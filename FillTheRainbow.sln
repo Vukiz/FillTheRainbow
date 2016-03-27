@@ -1,0 +1,23 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2008
+
+Project("{E83C74D2-E256-1BA1-5DDA-CA838B94FF2D}") = "FillTheRainbow", "Assembly-CSharp.csproj", "{092CB27B-95CA-3038-910F-22A8163A6089}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{092CB27B-95CA-3038-910F-22A8163A6089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{092CB27B-95CA-3038-910F-22A8163A6089}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{092CB27B-95CA-3038-910F-22A8163A6089}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{092CB27B-95CA-3038-910F-22A8163A6089}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(MonoDevelopProperties) = preSolution
+		StartupItem = Assembly-CSharp.csproj
+	EndGlobalSection
+EndGlobal
