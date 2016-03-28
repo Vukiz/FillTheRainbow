@@ -46,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Scripts\GameController.cs" />
+     <Compile Include="Assets\Scripts\PlateClick.cs" />
      <Compile Include="Assets\Scripts\PlatesControl.cs" />
      <Compile Include="Assets\Scripts\QuadSpread.cs" />
  <Reference Include="UnityEngine.UI">
