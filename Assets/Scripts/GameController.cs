@@ -3,43 +3,76 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class GameController : MonoBehaviour {
-    public GameObject SpreadObj;
-	private LinkedList<GameObject> ObjectContainer;
+    private LinkedList<GameObject> accounteObj;
+    private LinkedList<GameObject> ObjectContainer;
+    private GameObject lastObjSeen;
+
+    public float timeBetweenGeneration = 0.6f;
+    public int maxObjectsAtScene = 20; 
     private int zStart = 0;
     private int lastZIndex = -9;
+    private int GameScore;
+    private float timeSinceLastGeneration;
     private Text txtRef;
-    private float gameTime;
+
+    
     // Use this for initialization
-	void Start () {
+    void Start () {
+        accounteObj = new LinkedList<GameObject>();
         ObjectContainer = new LinkedList<GameObject>();
-        ObjectContainer.AddLast(GameObject.Instantiate(SpreadObj));
+        ObjectContainer = GameObject.Find("Controller").GetComponent<QuadGenerator>().getContainer;
+        Debug.Log(ObjectContainer);
         txtRef = GameObject.Find("Timer").GetComponent<Text>();
-        gameTime = 0;
+        GameScore = 0;
+        timeSinceLastGeneration = 0;
+        lastObjSeen = null;
     }
 	
 	// Update is called once per frame
 	void Update () {
-        gameTime += Time.deltaTime;
-        txtRef.text = "Time: " + gameTime;
+        timeSinceLastGeneration += Time.deltaTime;
+        //checkObjOut();
     }
-    public void Spread()
+    public void Spread(Color c)
     {
-        foreach (GameObject Spreading in ObjectContainer)
+        if (timeSinceLastGeneration > timeBetweenGeneration)
         {
-            Spreading.GetComponent<QuadSpread>().Spread();
+            timeSinceLastGeneration = 0;
+            ObjectContainer.Last.Value.GetComponent<Renderer>().material.color = c;
+            foreach (GameObject Spreading in ObjectContainer)
+            {
+                Spreading.GetComponent<QuadSpread>().Spread();
+            }
+            if (zStart > lastZIndex) zStart--;
+            gameObject.GetComponent<QuadGenerator>().generate(zStart);
+           
+            CheckContainerForDestroy();
         }
-        if (zStart > lastZIndex) zStart--;
-        ObjectContainer.AddLast(GameObject.Instantiate(SpreadObj));
-        ObjectContainer.Last.Value.GetComponent<Transform>().position = new Vector3(0, 0, zStart);
-
-        CheckContainerForDestroy();
     }
     void CheckContainerForDestroy()
     {
-        if (ObjectContainer.Count > 10)
+        if (ObjectContainer.Count > maxObjectsAtScene)
         {
             Destroy(ObjectContainer.First.Value);
             ObjectContainer.RemoveFirst();
         }
+    }
+    void checkObjOut()
+    {   
+        if((ObjectContainer.First.Value.transform.localScale.x < 10) )
+        {
+            lastObjSeen = null;
+        }
+        else
+        {
+            lastObjSeen = ObjectContainer.First.Value;
+          
+            lastObjSeen.GetComponent<Renderer>().material.color = Color.black;
+        }
+    }
+    void changeScore(int sc)
+    {
+        GameScore = sc;
+        txtRef.text = "Score: " + GameScore;
     }
 }
