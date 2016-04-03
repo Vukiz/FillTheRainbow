@@ -15,7 +15,8 @@ public class PlateControl : MonoBehaviour {
     {
         if (Input.GetMouseButtonDown(0))
         {
-            currController.Spread(gameObject.GetComponent<Renderer>().material.color);
+            currController.CheckNeeded = true;
+            currController.changeLastColor(gameObject.GetComponent<Renderer>().material.color);
         }
     }
 }
