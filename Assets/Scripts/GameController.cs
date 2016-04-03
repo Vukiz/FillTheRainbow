@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Collections;
 
 public class GameController : MonoBehaviour {
     private LinkedList<GameObject> accountedObj;
@@ -63,14 +64,9 @@ public class GameController : MonoBehaviour {
             zStart--;
         }
         gameObject.GetComponent<QuadGenerator>().generate(zStart);
-        CollapseCheckNeeded = true;
+        CheckNeeded = true;
         CheckContainerForDestroy();
     } // generates new obj through  QuadGenerator.cs
-    public void changeLastColor(Color c) // color of last pressed plate
-    {
-        LastColorPressed = c;
-    }
-
     void CheckContainerForDestroy() // checks if container is out of bounds
     {
         if (ObjectContainer.Count > maxObjectsAtScene)
@@ -94,63 +90,84 @@ public class GameController : MonoBehaviour {
             }
         }
     }
-    void checkForCollapse()// is it really important to invoke this every frame?
+    void checkForCollapse()
     {
+
+        Debug.Log("Checking for collapse");
         CollapseCheckNeeded = false;
 
+        int objectCollapsed = 0;
         GameObject currObject = ObjectContainer.Last.Value;
         LinkedList<GameObject> ListToCollapse = new LinkedList<GameObject>();
-        while ((currObject != null ) && (currObject != ObjectContainer.First.Value))
+        objectCollapsed = 1;
+        LinkedListNode<GameObject> prev = ObjectContainer.Find(currObject).Previous;
+        while (prev != null)
         {
-            int objectCollapsed = 1;
-            bool collapse = false;
-            ListToCollapse.AddLast(currObject);
-            while (!collapse)
+            if (currObject.GetComponent<QuadSpread>().IsPerfRotate== prev.Value.GetComponent<QuadSpread>().IsPerfRotate &&
+                currObject.GetComponent<Renderer>().material.color == prev.Value.GetComponent<Renderer>().material.color)
             {
-                if (ObjectContainer.Find(currObject).Previous.Value != null)
-                {
-                    GameObject prev = ObjectContainer.Find(currObject).Previous.Value;
-                    if (currObject.GetComponent<Transform>().rotation == prev.GetComponent<Transform>().rotation &&
-                        currObject.GetComponent<Renderer>().material.color == prev.GetComponent<Renderer>().material.color)
-                    {
-                        ListToCollapse.AddLast(prev);
-                        currObject = prev;
-                        objectCollapsed++;
-                    }
-                    else
-                    {
-                        if(ListToCollapse.Count > 1)
-                        CollapseObjects(ListToCollapse, objectCollapsed);
-                        currObject = prev;
-                        collapse = false;
-                        ListToCollapse.Clear();
-                    }
-                }
+                objectCollapsed++;
+                ListToCollapse.AddLast(currObject);
+                //Debug.Log("Objects Collapsed! " + ListToCollapse.Count);
             }
+            else
+            {
+                if (ListToCollapse.Count > 1)
+                {
+                    CollapseObjects(ListToCollapse, objectCollapsed);
+                }
+                objectCollapsed = 1;
+                ListToCollapse.Clear();
+                //Debug.Log("ListCleared now size is " + ListToCollapse.Count);
+            }
+            currObject = prev.Value;
+            ListToCollapse.AddLast(currObject);
+            prev = ObjectContainer.Find(currObject).Previous;
         }
+        
     }
     void CollapseObjects(LinkedList<GameObject> collapse, int count)// removes collapseobjects from ObjectContainer and Scene
     {
-        LinkedListNode<GameObject> curObject = ObjectContainer.Find(collapse.Last.Value);
+        LinkedListNode<GameObject> curObject = ObjectContainer.First;
+        LinkedListNode<GameObject> lastOjb = ObjectContainer.Find(collapse.Last.Value);
+        do
+        {
+            curObject.Value.GetComponent<Transform>().position -= new Vector3(0, 0, count);
+            // curObject.Value.GetComponent<Transform>().localScale -= new Vector3(0.5f, 0.5f, 0) * count;
+            StartCoroutine(changeScaleToNullAndBack(curObject.Value.GetComponent<QuadSpread>(), count));
+            curObject = curObject.Next;
+            Debug.Log("Scale lowered");
+        } while (curObject != lastOjb);
         foreach (GameObject o in collapse)
         {
             ObjectContainer.Remove(o);
             Destroy(o);
         }
-        do
+        //TODO COROUTINE CHECKFORCOLLAPSE AFTER 0,5S IN CASE OF MULTIPLE COLLAPSES ( ZUMA) 
+    }   
+    IEnumerator changeScaleToNullAndBack(QuadSpread qs,int timeWaiting)
+    {
+        float timeNulled = 0.0f;
+        qs.changeScale = Vector3.zero;
+        while (timeNulled < 1.0f * timeWaiting)
         {
-            curObject.Value.GetComponent<Transform>().position -= new Vector3(0, 0, count);
-            curObject.Value.GetComponent<Transform>().localScale -= new Vector3(0.5f, 0.5f, 0) * count;
-            curObject = curObject.Next;
-        } while (curObject != null);
-        
+            timeNulled += Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+        qs.changeScale = new Vector3(0.5f, 0.5f, 0);
     }
     void changeScore(int sc)
     {
         GameScore = sc;
         txtRef.text = "Score: " + GameScore;
     }
-
+    public Color changeLastColor // color of last pressed plate
+    {
+        set
+        {
+            LastColorPressed = value;
+        }
+    }
     public bool CheckNeeded
     {
         set{

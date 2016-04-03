@@ -4,18 +4,37 @@ using System.Collections;
 public class QuadSpread : MonoBehaviour
 {
     private GameController curController;
+    bool PerfectRotation = false;
     bool objActive = true;
     private Vector3 scaleVector = new Vector3(0.5f, 0.5f, 0);
     void Update()
     {
         if (gameObject.GetComponent<Renderer>().material.color == Color.black) objActive = false;
         gameObject.transform.localScale += scaleVector * Time.deltaTime;
+        if (transform.rotation.eulerAngles == Vector3.zero) IsPerfRotate = true;
     }
     public void moveByZ()
     {
         transform.position += new Vector3(0, 0, 1);
     }
- 
+    public bool IsPerfRotate
+    {
+        get
+        {
+            return PerfectRotation;
+        }
+        set
+        {
+            PerfectRotation = value;
+        }
+    }
+    public Vector3 changeScale
+    {
+        set
+        {
+            scaleVector = value;
+        }
+    }
     void Start()
     {
         curController = GameObject.Find("Controller").GetComponent<GameController>();
@@ -39,6 +58,6 @@ public class QuadSpread : MonoBehaviour
             elapsedTime += Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
-        yield return null;
+        
     }
 }
